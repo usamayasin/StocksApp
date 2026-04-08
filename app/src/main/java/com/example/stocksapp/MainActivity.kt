@@ -27,7 +27,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 @Composable
 private fun MainScreen() {
     Surface(
