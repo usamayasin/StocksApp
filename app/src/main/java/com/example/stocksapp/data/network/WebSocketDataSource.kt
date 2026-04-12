@@ -10,8 +10,6 @@ interface WebSocketDataSource {
 
     suspend fun disconnect()
 
-    suspend fun sendPriceUpdate(priceUpdate: StockDto)
-
     fun observePriceUpdates(): Flow<StockDto>
 
     fun observeConnectionStatus(): Flow<ConnectionState>

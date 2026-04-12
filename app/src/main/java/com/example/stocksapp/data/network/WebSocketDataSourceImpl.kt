@@ -125,21 +125,6 @@ class WebSocketDataSourceImpl @Inject constructor(
         connectionStateFlow.value = ConnectionState.Disconnected
     }
 
-    override suspend fun sendPriceUpdate(priceUpdate: StockDto) {
-        val socket = synchronized(lock) {
-            if (connectionStateFlow.value !is ConnectionState.Connected) return
-            webSocket
-        } ?: return
-
-        try {
-            if (!socket.send(priceUpdate.toWireJson()))
-                connectionStateFlow.value = ConnectionState.Error("Send failed!")
-        } catch (e: Exception) {
-            connectionStateFlow.value =
-                ConnectionState.Error("Send failed with exception ${e.message}")
-        }
-    }
-
     override fun observePriceUpdates(): Flow<StockDto> =
         priceUpdates.asSharedFlow()
 
@@ -254,6 +239,21 @@ class WebSocketDataSourceImpl @Inject constructor(
                 connectionStateFlow.value =
                     ConnectionState.Error("Mock error: ${e.message}")
             }
+        }
+    }
+
+    private fun sendPriceUpdate(priceUpdate: StockDto) {
+        val socket = synchronized(lock) {
+            if (connectionStateFlow.value !is ConnectionState.Connected) return
+            webSocket
+        } ?: return
+
+        try {
+            if (!socket.send(priceUpdate.toWireJson()))
+                connectionStateFlow.value = ConnectionState.Error("Send failed!")
+        } catch (e: Exception) {
+            connectionStateFlow.value =
+                ConnectionState.Error("Send failed with exception ${e.message}")
         }
     }
 
