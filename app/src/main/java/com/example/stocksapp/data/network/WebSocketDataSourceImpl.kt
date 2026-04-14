@@ -22,10 +22,12 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
+import javax.net.ssl.SSLException
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * WebSocket data source using OkHttp.
@@ -62,8 +64,6 @@ class WebSocketDataSourceImpl @Inject constructor(
         private const val WEBSOCKET_URL = "wss://ws.postman-echo.com/raw"
         private const val NORMAL_CLOSE_CODE = 1000
         private const val NORMAL_CLOSE_REASON = "Disconnected"
-
-        // Balanced reconnect (simple + safe)
         private const val RECONNECT_DELAY_MS = 3000L
     }
 
@@ -119,7 +119,8 @@ class WebSocketDataSourceImpl @Inject constructor(
         try {
             socket?.close(NORMAL_CLOSE_CODE, NORMAL_CLOSE_REASON)
         } catch (_: Exception) {
-            connectionStateFlow.value = ConnectionState.Error("Socket Disconnect Failed!")
+            connectionStateFlow.value =
+                ConnectionState.Error("Could not stop the live feed. Please try again.")
         }
 
         connectionStateFlow.value = ConnectionState.Disconnected
@@ -164,14 +165,19 @@ class WebSocketDataSourceImpl @Inject constructor(
                 }
 
                 override fun onClosed(socket: WebSocket, code: Int, reason: String) {
-                    handleDisconnect(socket, "Closed: $code $reason")
+                    val closeMessage = if (code == NORMAL_CLOSE_CODE) {
+                        "Disconnected from the live price feed."
+                    } else {
+                        "Lost connection to the live price feed."
+                    }
+                    handleDisconnect(socket, closeMessage)
                 }
 
                 override fun onFailure(socket: WebSocket, t: Throwable, response: Response?) {
                     val beforeOpen = !opened
-                    handleDisconnect(socket, t.message ?: "Connection failed")
+                    handleDisconnect(socket, mapToUserMessage(t))
                     if (beforeOpen && continuation.isActive) {
-                        continuation.resumeWithException(t)
+                        continuation.resume(Unit)
                     }
                 }
             }
@@ -185,7 +191,7 @@ class WebSocketDataSourceImpl @Inject constructor(
         val shouldReconnect: Boolean
 
         synchronized(lock) {
-            if (webSocket !== socket) return
+            if (webSocket != null && webSocket !== socket) return
             webSocket = null
             shouldReconnect = !manualDisconnect
         }
@@ -199,6 +205,7 @@ class WebSocketDataSourceImpl @Inject constructor(
 
     private fun scheduleReconnect() {
         reconnectJob?.cancel()
+        connectionStateFlow.value = ConnectionState.Connecting
 
         reconnectJob = scope.launch {
             delay(RECONNECT_DELAY_MS)
@@ -261,4 +268,12 @@ class WebSocketDataSourceImpl @Inject constructor(
         sendingJob?.cancel()
         sendingJob = null
     }
+
+    private fun mapToUserMessage(throwable: Throwable): String =
+        when (throwable) {
+            is UnknownHostException -> "No internet connection. Check your network and try again."
+            is SocketTimeoutException -> "Connection timed out. Please try again."
+            is SSLException -> "Secure connection failed. Please try again."
+            else -> "Unable to connect to live feed. Please try again."
+        }
 }

@@ -5,6 +5,7 @@ import org.json.JSONObject
 data class StockDto(
     val symbol: String,
     val companyName: String,
+    val logoUrl: String?,
     val price: Double,
     val previousPrice: Double,
     val timestamp: Long
@@ -14,6 +15,7 @@ fun StockDto.toWireJson(): String =
     JSONObject().apply {
         put("symbol", symbol)
         put("companyName", companyName)
+        put("logoUrl", logoUrl)
         put("price", price)
         put("previousPrice", previousPrice)
         put("timestamp", timestamp)
@@ -25,6 +27,7 @@ fun parseStockDtoFromWire(text: String): StockDto? =
         StockDto(
             symbol = json.getString("symbol"),
             companyName = json.optString("companyName", ""),
+            logoUrl = json.optString("logoUrl", "").takeIf { it.isNotBlank() },
             price = json.getDouble("price"),
             previousPrice = json.getDouble("previousPrice"),
             timestamp = json.getLong("timestamp")

@@ -1,3 +1,22 @@
 <resources>
-    <string name="app_name">StocksApp</string>
+    <string name="app_name">Stocks App</string>
+    <string name="stock_price_pulse_title">Stocks App</string>
+    <string name="msg_press_start">Press Start to begin receiving price updates.</string>
+    <string name="msg_connecting">Connecting…</string>
+    <string name="msg_connection_error_generic">Unable to connect to live feed. Please try again.</string>
+    <string name="stock_detail_unavailable">This quote is unavailable. Go back and start the feed.</string>
+    <string name="stock_detail_last_price_label">Last price</string>
+    <string name="stock_detail_day_movement">Today\'s movement</string>
+    <string name="stock_detail_section_key_figures">Key figures</string>
+    <string name="stock_detail_previous_close">Previous close</string>
+    <string name="stock_detail_day_change">Day change</string>
+    <string name="stock_detail_day_change_percent">Day change %</string>
+    <string name="cd_start_feed">Start price feed</string>
+    <string name="cd_pause_feed">Stop price feed</string>
+    <string name="cd_toggle_theme">Toggle dark theme</string>
+    <string name="cd_navigate_back">Navigate back</string>
+    <string name="cd_status_connected">Connected</string>
+    <string name="cd_status_connecting">Connecting</string>
+    <string name="cd_status_disconnected">Disconnected</string>
+    <string name="cd_status_error">Connection error</string>
 </resources>

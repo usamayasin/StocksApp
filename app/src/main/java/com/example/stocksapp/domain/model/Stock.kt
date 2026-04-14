@@ -3,6 +3,7 @@ package com.example.stocksapp.domain.model
 data class Stock(
     val symbol: String,
     val companyName: String,
+    val logoUrl: String?,
     val price: Double,
     val change: Double
 ) {

@@ -74,7 +74,40 @@ class MockStockPriceDataSource @Inject constructor() {
             "RBLX" to "Roblox Corp."
         )
 
+        private val COMPANY_DOMAINS: Map<String, String> = mapOf(
+            "AAPL" to "apple.com",
+            "GOOG" to "google.com",
+            "MSFT" to "microsoft.com",
+            "AMZN" to "amazon.com",
+            "TSLA" to "tesla.com",
+            "NVDA" to "nvidia.com",
+            "META" to "meta.com",
+            "NFLX" to "netflix.com",
+            "AMD" to "amd.com",
+            "INTC" to "intel.com",
+            "ORCL" to "oracle.com",
+            "CRM" to "salesforce.com",
+            "ADBE" to "adobe.com",
+            "PYPL" to "paypal.com",
+            "UBER" to "uber.com",
+            "LYFT" to "lyft.com",
+            "SPOT" to "spotify.com",
+            "TWTR" to "x.com",
+            "SNAP" to "snapchat.com",
+            "PINS" to "pinterest.com",
+            "SQ" to "block.xyz",
+            "SHOP" to "shopify.com",
+            "ZM" to "zoom.us",
+            "DOCU" to "docusign.com",
+            "RBLX" to "roblox.com"
+        )
+
         fun getCompanyName(symbol: String): String = COMPANY_NAMES[symbol] ?: symbol
+
+        fun getCompanyLogoUrl(symbol: String): String? {
+            val domain = COMPANY_DOMAINS[symbol] ?: return null
+            return "https://www.google.com/s2/favicons?sz=64&domain=$domain"
+        }
     }
 
     private val basePrices: Map<String, Double> = STOCK_SYMBOLS.toMap()
@@ -100,6 +133,7 @@ class MockStockPriceDataSource @Inject constructor() {
             StockDto(
                 symbol = symbol,
                 companyName = getCompanyName(symbol),
+                logoUrl = getCompanyLogoUrl(symbol),
                 price = basePrice,
                 previousPrice = basePrice,
                 timestamp = ts
@@ -123,6 +157,7 @@ class MockStockPriceDataSource @Inject constructor() {
             StockDto(
                 symbol = symbol,
                 companyName = getCompanyName(symbol),
+                logoUrl = getCompanyLogoUrl(symbol),
                 price = newPrice,
                 previousPrice = previousPrice,
                 timestamp = timestamp

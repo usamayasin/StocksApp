@@ -15,6 +15,7 @@ class StockDtoToDomainMapperImpl @Inject constructor() : StockDtoToDomainMapper 
     override fun toDomain(dto: StockDto): Stock = Stock(
         symbol = dto.symbol,
         companyName = dto.companyName,
+        logoUrl = dto.logoUrl,
         price = dto.price,
         change = dto.price - dto.previousPrice
     )
