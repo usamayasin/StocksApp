@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class StocksViewModel @Inject constructor(
+class StocksListViewModel @Inject constructor(
     private val connectStocksFeed: ConnectStocksFeedUseCase,
     private val disconnectStocksFeed: DisconnectStocksFeedUseCase,
     private val observeStockPrices: ObserveStockPricesUseCase,
@@ -31,7 +31,6 @@ class StocksViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _stocksBySymbol = MutableStateFlow<Map<String, Stock>>(emptyMap())
-    private val stockBySymbolFlows = mutableMapOf<String, StateFlow<Stock?>>()
 
     val stocks: StateFlow<List<Stock>> = _stocksBySymbol
         .map { map -> map.values.sortedByDescending { it.price } }
@@ -80,17 +79,4 @@ class StocksViewModel @Inject constructor(
             }
         }
     }
-
-    fun stockBySymbol(symbol: String): StateFlow<Stock?> =
-        synchronized(stockBySymbolFlows) {
-            stockBySymbolFlows.getOrPut(symbol) {
-                _stocksBySymbol
-                    .map { stocks -> stocks[symbol] }
-                    .stateIn(
-                        scope = viewModelScope,
-                        started = SharingStarted.WhileSubscribed(5_000),
-                        initialValue = _stocksBySymbol.value[symbol],
-                    )
-            }
-        }
 }

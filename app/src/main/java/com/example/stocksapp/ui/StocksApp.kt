@@ -11,12 +11,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import androidx.navigation.navDeepLink
 import com.example.stocksapp.ui.navigation.StockDetailDestination
 import com.example.stocksapp.ui.navigation.StocksListDestination
-import com.example.stocksapp.ui.stocks.StockDetailScreen
+import com.example.stocksapp.ui.detail.StockDetailScreen
+import com.example.stocksapp.ui.detail.StockDetailViewModel
 import com.example.stocksapp.ui.stocks.StocksListScreen
-import com.example.stocksapp.ui.stocks.StocksViewModel
+import com.example.stocksapp.ui.stocks.StocksListViewModel
 import com.example.stocksapp.ui.theme.StocksAppTheme
 
 @Composable
@@ -29,15 +30,17 @@ fun StocksApp(
 
     StocksAppTheme(darkTheme = useDarkTheme) {
         val navController = rememberNavController()
-        val viewModel: StocksViewModel = hiltViewModel()
+
         NavHost(
             navController = navController,
             startDestination = StocksListDestination,
             modifier = modifier,
         ) {
             composable<StocksListDestination> {
+
+                val stockslistViewModel: StocksListViewModel = hiltViewModel()
                 StocksListScreen(
-                    viewModel = viewModel,
+                    viewModel = stockslistViewModel,
                     onStockClick = { stock ->
                         navController.navigate(StockDetailDestination(stock.symbol))
                     },
@@ -47,11 +50,16 @@ fun StocksApp(
                     },
                 )
             }
-            composable<StockDetailDestination> { entry ->
-                val destination = entry.toRoute<StockDetailDestination>()
+            composable<StockDetailDestination>(
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "stocks://symbol/{symbol}"
+                    },
+                ),
+            ) {
+                val stockDetailViewModel: StockDetailViewModel = hiltViewModel()
                 StockDetailScreen(
-                    symbol = destination.symbol,
-                    viewModel = viewModel,
+                    viewModel = stockDetailViewModel,
                     onBack = { navController.popBackStack() },
                 )
             }

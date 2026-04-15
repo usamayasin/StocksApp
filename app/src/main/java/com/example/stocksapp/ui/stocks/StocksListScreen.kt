@@ -25,14 +25,13 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,7 +46,7 @@ import com.example.stocksapp.ui.components.StocksEmptyState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StocksListScreen(
-    viewModel: StocksViewModel,
+    viewModel: StocksListViewModel,
     onStockClick: (Stock) -> Unit,
     darkTheme: Boolean,
     onDarkThemeToggle: () -> Unit,
@@ -73,6 +72,10 @@ internal fun StocksListScreen(
         },
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                ),
                 title = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -89,12 +92,6 @@ internal fun StocksListScreen(
                 },
                 actions = {
                     val connected = connectionStatus.value.isInConnectedState()
-                    val desc = if (connected) {
-                        stringResource(R.string.cd_pause_feed)
-                    } else {
-                        stringResource(R.string.cd_start_feed)
-                    }
-                    val toggleThemeDesc = stringResource(R.string.cd_toggle_theme)
                     if (showConnectionLoader.value) {
                         CircularProgressIndicator(
                             modifier = Modifier
@@ -104,8 +101,7 @@ internal fun StocksListScreen(
                         )
                     } else {
                         IconButton(
-                            onClick = { viewModel.onFeedToggleClicked() },
-                            modifier = Modifier.semantics { contentDescription = desc },
+                            onClick = { viewModel.onFeedToggleClicked() }
                         ) {
                             Icon(
                                 imageVector = if (connected) Icons.Filled.Stop else Icons.Filled.PlayArrow,
@@ -114,10 +110,7 @@ internal fun StocksListScreen(
                         }
                     }
                     IconButton(
-                        onClick = onDarkThemeToggle,
-                        modifier = Modifier.semantics {
-                            contentDescription = toggleThemeDesc
-                        },
+                        onClick = onDarkThemeToggle
                     ) {
                         Icon(
                             imageVector = if (darkTheme) Icons.Filled.WbSunny else Icons.Filled.NightlightRound,

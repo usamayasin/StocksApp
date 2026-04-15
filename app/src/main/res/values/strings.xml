@@ -5,6 +5,7 @@
     <string name="msg_connecting">Connecting…</string>
     <string name="msg_connection_error_generic">Unable to connect to live feed. Please try again.</string>
     <string name="stock_detail_unavailable">This quote is unavailable. Go back and start the feed.</string>
+    <string name="stock_detail_loading">Loading quote…</string>
     <string name="stock_detail_last_price_label">Last price</string>
     <string name="stock_detail_day_movement">Today\'s movement</string>
     <string name="stock_detail_section_key_figures">Key figures</string>

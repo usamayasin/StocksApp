@@ -20,7 +20,6 @@ internal fun formatChange(change: Double): String =
 internal fun formatChangePercent(percent: Double): String =
     String.format(Locale.US, "(%.2f%%)", percent)
 
-/** Same visible line as list rows: ▲ +0.13 (3.23%) */
 internal fun formatStockMovementLine(stock: Stock): String {
     val pct = stock.changePercent()
     return "${directionSymbol(stock.direction)} ${formatChange(stock.change)} ${formatChangePercent(pct)}"

@@ -87,6 +87,12 @@ class WebSocketDataSourceImpl @Inject constructor(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    init {
+        scope.launch {
+            connect()
+        }
+    }
+
     override suspend fun connect() {
         synchronized(lock) {
             if (connectionStateFlow.value is ConnectionState.Connected ||

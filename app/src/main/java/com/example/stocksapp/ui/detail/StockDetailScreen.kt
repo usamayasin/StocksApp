@@ -1,6 +1,7 @@
-package com.example.stocksapp.ui.stocks
+package com.example.stocksapp.ui.detail
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,15 +24,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -39,25 +39,32 @@ import com.example.stocksapp.R
 import com.example.stocksapp.domain.model.PriceDirection
 import com.example.stocksapp.domain.model.Stock
 import com.example.stocksapp.ui.components.StockLogoImage
+import com.example.stocksapp.ui.stocks.changePercent
+import com.example.stocksapp.ui.stocks.formatChange
+import com.example.stocksapp.ui.stocks.formatSignedPercent
+import com.example.stocksapp.ui.stocks.formatStockMovementLine
+import com.example.stocksapp.ui.stocks.formatUsd
 import com.example.stocksapp.ui.theme.StockDownRed
 import com.example.stocksapp.ui.theme.StockUpGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StockDetailScreen(
-    symbol: String,
-    viewModel: StocksViewModel,
+    viewModel: StockDetailViewModel,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val stockFlow = remember(symbol) { viewModel.stockBySymbol(symbol) }
-    val stock by stockFlow.collectAsStateWithLifecycle()
-    val navigateBackDesc = stringResource(R.string.cd_navigate_back)
+    val stock by viewModel.stock.collectAsStateWithLifecycle()
+    val symbol = viewModel.symbol
 
     Scaffold(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                ),
                 title = {
                     Text(
                         text = stock?.symbol ?: symbol,
@@ -68,9 +75,6 @@ internal fun StockDetailScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = onBack,
-                        modifier = Modifier.semantics {
-                            contentDescription = navigateBackDesc
-                        },
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -83,15 +87,22 @@ internal fun StockDetailScreen(
     ) { padding ->
         when (val currentStock = stock) {
             null -> {
-                Text(
-                    text = stringResource(R.string.stock_detail_unavailable),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
-                        .padding(24.dp),
-                )
+                        .padding(padding),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Text(
+                            text = stringResource(R.string.stock_detail_loading),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 16.dp),
+                        )
+                    }
+                }
             }
 
             else -> {
@@ -175,8 +186,7 @@ private fun StockDetailContent(
             text = formatUsd(stock.price),
             style = MaterialTheme.typography.displayMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.semantics { contentDescription = "$priceLabel ${formatUsd(stock.price)}" },
+            color = MaterialTheme.colorScheme.onSurface
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -250,10 +260,7 @@ private fun DetailStatRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 14.dp)
-            .semantics(mergeDescendants = true) {
-                contentDescription = "$label, $value"
-            },
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
